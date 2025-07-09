@@ -30,6 +30,8 @@ _Note: This project is used in course [Playwright z AI + MCP](https://jaktestowa
 
 ## Usage
 
+> **Note:** All API endpoints are available under the `/api/` path. For example, to list todos, use `/api/todos`.
+
 ### Start the server
 
 ```bash
@@ -41,16 +43,16 @@ You can access the App at [http://localhost:3013](http://localhost:3013).
 
 ### API Endpoints
 
-| Method | Endpoint                | Description                                                         |
-| ------ | ----------------------- | ------------------------------------------------------------------- |
-| GET    | `/todos`                | List all todos (optional `?status=pending\|in-progress\|completed`) |
-| POST   | `/todos`                | Create a new todo                                                   |
-| GET    | `/todos/:id`            | Get a specific todo by ID                                           |
-| PUT    | `/todos/:id`            | Update a todo                                                       |
-| DELETE | `/todos/:id`            | Delete a todo                                                       |
-| GET    | `/todos/status/:status` | Filter todos by status                                              |
-| GET    | `/help`                 | API documentation                                                   |
-| GET    | `/about`                | API information                                                     |
+| Method | Endpoint                    | Description                                                         |
+| ------ | --------------------------- | ------------------------------------------------------------------- |
+| GET    | `/api/todos`                | List all todos (optional `?status=pending\|in-progress\|completed`) |
+| POST   | `/api/todos`                | Create a new todo                                                   |
+| GET    | `/api/todos/:id`            | Get a specific todo by ID                                           |
+| PUT    | `/api/todos/:id`            | Update a todo                                                       |
+| DELETE | `/api/todos/:id`            | Delete a todo                                                       |
+| GET    | `/api/todos/status/:status` | Filter todos by status                                              |
+| GET    | `/api/help`                 | API documentation                                                   |
+| GET    | `/api/about`                | API information                                                     |
 
 ### Todo Status Values
 
@@ -63,7 +65,7 @@ You can access the App at [http://localhost:3013](http://localhost:3013).
 ### Create a todo
 
 ```bash
-curl -X POST http://localhost:3013/todos \
+curl -X POST http://localhost:3013/api/todos \
   -H "Content-Type: application/json" \
   -d '{"title": "Buy groceries", "description": "Milk, bread, eggs"}'
 ```
@@ -71,23 +73,23 @@ curl -X POST http://localhost:3013/todos \
 ### List all todos
 
 ```bash
-curl http://localhost:3013/todos
+curl http://localhost:3013/api/todos
 ```
 
 ### Filter by status
 
 ```bash
 # Query parameter
-curl http://localhost:3013/todos?status=pending
+curl http://localhost:3013/api/todos?status=pending
 
 # Path parameter
-curl http://localhost:3013/todos/status/completed
+curl http://localhost:3013/api/todos/status/completed
 ```
 
 ### Update todo status
 
 ```bash
-curl -X PUT http://localhost:3013/todos/1 \
+curl -X PUT http://localhost:3013/api/todos/1 \
   -H "Content-Type: application/json" \
   -d '{"status": "completed"}'
 ```
@@ -95,13 +97,13 @@ curl -X PUT http://localhost:3013/todos/1 \
 ### Delete a todo
 
 ```bash
-curl -X DELETE http://localhost:3013/todos/1
+curl -X DELETE http://localhost:3013/api/todos/1
 ```
 
 ### Get API documentation
 
 ```bash
-curl http://localhost:3013/help
+curl http://localhost:3013/api/help
 ```
 
 ## Response Format
