@@ -271,7 +271,7 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            z-index: 100;
+            z-index: 10000;
         }
 
         .add-todo-btn:hover {
@@ -501,9 +501,7 @@
             background: #f8f8fa;
             border-radius: 10px 10px 0 0;
             overflow-x: auto;
-            padding: 0 2px;
-            max-height: 38px;
-            min-height: 36px;
+            max-height: 40px;
         }
 
         .api-doc-tab-btn {
@@ -531,14 +529,14 @@
         }
 
         .api-doc-tab-btn:not(.active):hover {
-            background: #ede9f7;
+            background: #e4def5;
             color: #5a3d8c;
         }
 
         .api-doc-tab-btn.active {
             background: #fff;
             color: #2d3748;
-            border-bottom: 2px solid #764ba2;
+            border-bottom: 4px solid #764ba2;
             z-index: 2;
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
         }
@@ -632,7 +630,7 @@
 <body>
 
     <div class="container">
-        <h1>Todo List</h1>
+        <h1>TODO App</h1>
         <div class="checkbox-container">
             <input type="checkbox" id="toggleCompleted">
             <label for="toggleCompleted">Show Completed Todos</label>
