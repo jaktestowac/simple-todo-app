@@ -73,7 +73,7 @@
         }
 
         .todo.completed {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
             border-left: 4px solid #28a745;
         }
 
@@ -83,8 +83,35 @@
         }
 
         .todo.pending {
+            background: linear-gradient(135deg, #ffeced 0%, #f3d5d8 100%);
+            border-left: 4px solid #dc3545;
+        }
+
+        .todo.deadline-today {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-left: 4px solid #ffc107;
+            border-right: 4px solid #ffc107;
+        }
+
+        .todo.deadline-overdue {
             background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
             border-left: 4px solid #dc3545;
+            border-right: 4px solid #dc3545;
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+            }
+
+            50% {
+                box-shadow: 0 4px 20px rgba(220, 53, 69, 0.3);
+            }
+
+            100% {
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
+            }
         }
 
         .todo h3 {
@@ -484,8 +511,33 @@
             padding-left: 18px;
         }
 
-        .api-doc-error {
-            color: #c00;
+        .deadline-indicator {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .deadline-today {
+            background: #ffc107;
+            color: white;
+        }
+
+        .deadline-overdue {
+            background: #dc3545;
+            color: white;
+        }
+
+        .deadline-due {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .deadline-upcoming {
+            background: #28a745;
+            color: white;
         }
 
         /* Tabs for API doc */
@@ -666,6 +718,7 @@
             <form id="addTodoForm">
                 <input type="text" id="title" placeholder="Title" required>
                 <textarea id="description" placeholder="Description"></textarea>
+                <input type="datetime-local" id="deadline" placeholder="Deadline (optional)">
                 <button type="submit">Add Todo</button>
             </form>
         </div>
@@ -824,6 +877,7 @@
         async function fetchTodos() {
             const response = await fetch(API_BASE);
             const data = await response.json();
+            window.lastTodos = data.data; // Store for popup
             const todosDiv = document.getElementById('todos');
             const toggleCheckbox = document.getElementById('toggleCompleted');
             const showCompleted = toggleCheckbox.checked;
@@ -844,12 +898,34 @@
 
             filteredTodos.forEach(todo => {
                 const todoDiv = document.createElement('div');
-                todoDiv.className = `todo ${todo.status}`;
-                // Format dates (compact, with date and time)
+
+                // Determine deadline status
+                let deadlineClass = '';
+                let deadlineIndicator = '';
+                if (todo.deadline) {
+                    const deadline = new Date(todo.deadline);
+                    const today = new Date();
+                    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    const deadlineStart = new Date(deadline.getFullYear(), deadline.getMonth(), deadline.getDate());
+
+                    if (deadlineStart < todayStart) {
+                        deadlineClass = 'deadline-overdue';
+                        deadlineIndicator = '<span class="deadline-indicator deadline-overdue">OVERDUE</span>';
+                    } else if (deadlineStart.getTime() === todayStart.getTime()) {
+                        deadlineClass = 'deadline-today';
+                        deadlineIndicator = '<span class="deadline-indicator deadline-today">DUE TODAY</span>';
+                    } else {
+                        deadlineClass = 'deadline-due';
+                        deadlineIndicator = '<span class="deadline-indicator deadline-upcoming">DUE: ' + deadline.toLocaleDateString() + '</span>';
+                    }
+                }
+
+                todoDiv.className = `todo ${todo.status} ${deadlineClass}`;
+                // Format dates in ISO format
                 const createdAt = todo.createdAt ? new Date(todo.createdAt) : null;
                 const updatedAt = todo.updatedAt ? new Date(todo.updatedAt) : null;
-                // Format as YYYY-MM-DD HH:MM
-                const fmt = d => d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : '';
+                // Format as ISO string (truncated to minutes)
+                const fmt = d => d ? d.toISOString().slice(0, 16).replace('T', ' ') : '';
                 const createdStr = createdAt ? `C: ${fmt(createdAt)}` : '';
                 const updatedStr = updatedAt ? `U: ${fmt(updatedAt)}` : '';
                 // Limit title/desc
@@ -868,7 +944,7 @@
                 const viewBtn = `<button onclick="showTodoPopup(${todo.id})">View</button>`;
                 todoDiv.innerHTML = `
           <span class="status-badge ${todo.status}">${todo.status}</span>
-          <h3>${shortTitle}</h3>
+          <h3>${shortTitle}${deadlineIndicator}</h3>
           <p>${shortDesc || ''}</p>
           <div style="font-size: 11px; color: #888; margin-bottom: 2px; display: flex; gap: 10px;">
             <span>${createdStr}</span>&nbsp;<span>${updatedStr}</span>
@@ -917,112 +993,31 @@
             document.getElementById('todoViewDesc').textContent = todo.description || '';
             const createdAt = todo.createdAt ? new Date(todo.createdAt) : null;
             const updatedAt = todo.updatedAt ? new Date(todo.updatedAt) : null;
-            const fmt = d => d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : '';
-            document.getElementById('todoViewDates').textContent = `Created: ${fmt(createdAt)} | Updated: ${fmt(updatedAt)}`;
+            const deadline = todo.deadline ? new Date(todo.deadline) : null;
+            const fmt = d => d ? d.toISOString().slice(0, 16).replace('T', ' ') : '';
+            const deadlineText = deadline ? ` | Deadline: ${fmt(deadline)}` : '';
+            document.getElementById('todoViewDates').textContent = `Created: ${fmt(createdAt)} | Updated: ${fmt(updatedAt)}${deadlineText}`;
             document.getElementById('todoViewModal').classList.add('active');
-        }
-
-        // Store last todos for popup
-        async function fetchTodos() {
-            const response = await fetch(API_BASE);
-            const data = await response.json();
-            window.lastTodos = data.data;
-            const todosDiv = document.getElementById('todos');
-            const toggleCheckbox = document.getElementById('toggleCompleted');
-            const showCompleted = toggleCheckbox.checked;
-
-            todosDiv.innerHTML = '';
-
-            if (data.data.length === 0) {
-                todosDiv.innerHTML = '<div class="no-todos">No todos yet. Click the + button to add your first todo!</div>';
-                return;
-            }
-
-            const filteredTodos = data.data.filter(todo => showCompleted || todo.status !== 'completed');
-
-            if (filteredTodos.length === 0) {
-                todosDiv.innerHTML = '<div class="no-todos">No todos to display. Try checking "Show Completed Todos" to see completed items.</div>';
-                return;
-            }
-
-            filteredTodos.forEach(todo => {
-                const todoDiv = document.createElement('div');
-                todoDiv.className = `todo ${todo.status}`;
-                // Format dates (compact, with date and time)
-                const createdAt = todo.createdAt ? new Date(todo.createdAt) : null;
-                const updatedAt = todo.updatedAt ? new Date(todo.updatedAt) : null;
-                // Format as YYYY-MM-DD HH:MM
-                const fmt = d => d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : '';
-                const createdStr = createdAt ? `C: ${fmt(createdAt)}` : '';
-                const updatedStr = updatedAt ? `U: ${fmt(updatedAt)}` : '';
-                // Limit title/desc
-                const maxTitle = 40;
-                const maxDesc = 80;
-                const shortTitle = todo.title.length > maxTitle ? todo.title.slice(0, maxTitle) + '…' : todo.title;
-                const shortDesc = todo.description && todo.description.length > maxDesc ? todo.description.slice(0, maxDesc) + '…' : todo.description;
-                // Action button logic
-                let statusBtn = '';
-                if (todo.status === 'completed') {
-                    statusBtn = `<button onclick=\"updateTodoStatus(${todo.id}, 'pending')\">Mark as TODO</button>`;
-                } else {
-                    statusBtn = `<button onclick=\"updateTodoStatus(${todo.id}, 'completed')\">Mark as Completed</button>`;
-                }
-                // View button
-                const viewBtn = `<button onclick=\"showTodoPopup(${todo.id})\">View</button>`;
-                todoDiv.innerHTML = `
-          <span class=\"status-badge ${todo.status}\">${todo.status}</span>
-          <h3>${shortTitle}</h3>
-          <p>${shortDesc || ''}</p>
-          <div style=\"font-size: 11px; color: #888; margin-bottom: 2px; display: flex; gap: 10px;\">
-            <span>${createdStr}</span>&nbsp;<span>${updatedStr}</span>
-          </div>
-          <div class=\"todo-actions\">
-            <button onclick=\"deleteTodo(${todo.id})\">Delete</button>
-            ${statusBtn}
-            ${viewBtn}
-          </div>
-        `;
-                // Unescape HTML for correct rendering
-                todoDiv.innerHTML = todoDiv.innerHTML.replace(/\\"/g, '"');
-                todosDiv.appendChild(todoDiv);
-            });
-            // Add popup logic if not already present
-            if (!document.getElementById('todoViewModal')) {
-                const modal = document.createElement('div');
-                modal.id = 'todoViewModal';
-                modal.className = 'modal';
-                modal.innerHTML = `
-                <div class=\"modal-content\" id=\"todoViewModalContent\">
-                  <button class=\"modal-close\" id=\"closeTodoViewModal\">&times;</button>
-                  <h2 id=\"todoViewTitle\"></h2>
-                  <div id=\"todoViewStatus\" style=\"margin-bottom:8px;\"></div>
-                  <div id=\"todoViewDesc\" style=\"margin-bottom:8px;\"></div>
-                  <div id=\"todoViewDates\" style=\"font-size:12px;color:#888;\"></div>
-                </div>
-              `;
-                document.body.appendChild(modal);
-                document.getElementById('closeTodoViewModal').onclick = () => {
-                    document.getElementById('todoViewModal').classList.remove('active');
-                };
-                document.getElementById('todoViewModal').onclick = (e) => {
-                    if (e.target === document.getElementById('todoViewModal')) {
-                        document.getElementById('todoViewModal').classList.remove('active');
-                    }
-                };
-            }
         }
 
         async function addTodo(event) {
             event.preventDefault();
             const title = document.getElementById('title').value;
             const description = document.getElementById('description').value;
+            const deadline = document.getElementById('deadline').value;
+
+            const todoData = { title, description };
+            if (deadline) {
+                const deadlineDate = new Date(deadline);
+                todoData.deadline = deadlineDate.toISOString();
+            }
 
             await fetch(API_BASE, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ title, description }),
+                body: JSON.stringify(todoData),
             });
 
             document.getElementById('addTodoForm').reset();

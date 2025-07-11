@@ -131,6 +131,7 @@ interface Todo {
   status: 'pending' | 'in-progress' | 'completed';
   createdAt: Date;
   updatedAt: Date;
+  deadline?: Date; // Optional deadline
 }
 ```
 

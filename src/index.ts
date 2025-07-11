@@ -18,6 +18,7 @@ interface Todo {
   status: 'pending' | 'in-progress' | 'completed';
   createdAt: Date;
   updatedAt: Date;
+  deadline?: Date; // Optional deadline field
 }
 
 // In-memory storage (you can replace this with a database)
@@ -63,13 +64,21 @@ app.get('/api/todos/:id', (req, res) => {
 
 // POST /api/todos - Add new todo
 app.post('/api/todos', (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, deadline } = req.body;
 
   if (!title) {
     return res.status(400).json({
       success: false,
       message: 'Title is required',
     });
+  }
+
+  let parsedDeadline: Date | undefined = undefined;
+  if (deadline) {
+    const d = new Date(deadline);
+    if (!isNaN(d.getTime())) {
+      parsedDeadline = d;
+    }
   }
 
   const newTodo: Todo = {
@@ -79,6 +88,7 @@ app.post('/api/todos', (req, res) => {
     status: 'pending',
     createdAt: new Date(),
     updatedAt: new Date(),
+    deadline: parsedDeadline,
   };
 
   todos.push(newTodo);
@@ -102,7 +112,7 @@ app.put('/api/todos/:id', (req, res) => {
     });
   }
 
-  const { title, description, status } = req.body;
+  const { title, description, status, deadline } = req.body;
 
   // Validate status if provided
   if (status && !['pending', 'in-progress', 'completed'].includes(status)) {
@@ -116,6 +126,14 @@ app.put('/api/todos/:id', (req, res) => {
   if (title !== undefined) todos[todoIndex].title = title;
   if (description !== undefined) todos[todoIndex].description = description;
   if (status !== undefined) todos[todoIndex].status = status;
+  if (deadline !== undefined) {
+    const d = new Date(deadline);
+    if (!isNaN(d.getTime())) {
+      todos[todoIndex].deadline = d;
+    } else {
+      todos[todoIndex].deadline = undefined;
+    }
+  }
   todos[todoIndex].updatedAt = new Date();
 
   res.json({
@@ -186,8 +204,9 @@ app.get('/api/help', (req, res) => {
           body: {
             title: 'required - string',
             description: 'optional - string',
+            deadline: 'optional - string (ISO date)',
           },
-          example: '{"title": "Buy groceries", "description": "Milk, bread, eggs"}',
+          example: '{"title": "Buy groceries", "description": "Milk, bread, eggs", "deadline": "2025-07-31T23:59:59Z"}',
         },
         'GET /api/todos/:id': {
           description: 'Get a specific todo by ID',
@@ -205,8 +224,9 @@ app.get('/api/help', (req, res) => {
             title: 'optional - string',
             description: 'optional - string',
             status: 'optional - string (pending|in-progress|completed)',
+            deadline: 'optional - string (ISO date)',
           },
-          example: '{"status": "completed"}',
+          example: '{"status": "completed", "deadline": "2025-07-31T23:59:59Z"}',
         },
         'DELETE /api/todos/:id': {
           description: 'Delete a todo',
