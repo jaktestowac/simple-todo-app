@@ -167,7 +167,8 @@
         }
 
         input,
-        textarea {
+        textarea,
+        select {
             padding: 12px 16px;
             border: 2px solid #e2e8f0;
             border-radius: 10px;
@@ -177,7 +178,8 @@
         }
 
         input:focus,
-        textarea:focus {
+        textarea:focus,
+        select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -208,17 +210,19 @@
 
         .todo-actions {
             display: flex;
-            gap: 4px;
+            gap: 2px;
             margin-top: 8px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
 
         .todo-actions button {
-            font-size: 12px;
-            padding: 5px 8px;
-            flex: 1 1 30%;
+            font-size: 10px;
+            padding: 4px 6px;
+            flex: 1;
             min-width: 0;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .todo-actions button:first-child {
@@ -710,7 +714,7 @@
     <!-- Floating Add Button -->
     <button class="add-todo-btn" id="openModal">+</button>
 
-    <!-- Modal -->
+    <!-- Add Todo Modal -->
     <div class="modal" id="todoModal">
         <div class="modal-content">
             <button class="modal-close" id="closeModal">&times;</button>
@@ -720,6 +724,26 @@
                 <textarea id="description" placeholder="Description"></textarea>
                 <input type="datetime-local" id="deadline" placeholder="Deadline (optional)">
                 <button type="submit">Add Todo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Todo Modal -->
+    <div class="modal" id="editTodoModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeEditModal">&times;</button>
+            <h2>Edit Todo</h2>
+            <form id="editTodoForm">
+                <input type="hidden" id="editTodoId">
+                <input type="text" id="editTitle" placeholder="Title" required>
+                <textarea id="editDescription" placeholder="Description"></textarea>
+                <input type="datetime-local" id="editDeadline" placeholder="Deadline (optional)">
+                <select id="editStatus">
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+                <button type="submit">Update Todo</button>
             </form>
         </div>
     </div>
@@ -940,8 +964,9 @@
                 } else {
                     statusBtn = `<button onclick=\"updateTodoStatus(${todo.id}, 'completed')\">Mark as Completed</button>`;
                 }
-                // View button
+                // View and Edit buttons
                 const viewBtn = `<button onclick="showTodoPopup(${todo.id})">View</button>`;
+                const editBtn = `<button onclick="showEditModal(${todo.id})" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">Edit</button>`;
                 todoDiv.innerHTML = `
           <span class="status-badge ${todo.status}">${todo.status}</span>
           <h3>${shortTitle}${deadlineIndicator}</h3>
@@ -952,6 +977,7 @@
           <div class="todo-actions">
             <button onclick="deleteTodo(${todo.id})">Delete</button>
             ${statusBtn}
+            ${editBtn}
             ${viewBtn}
           </div>
         `;
@@ -1000,6 +1026,55 @@
             document.getElementById('todoViewModal').classList.add('active');
         }
 
+        // Show edit modal with pre-filled data
+        function showEditModal(id) {
+            const todo = (window.lastTodos || []).find(t => t.id === id);
+            if (!todo) return;
+
+            document.getElementById('editTodoId').value = todo.id;
+            document.getElementById('editTitle').value = todo.title;
+            document.getElementById('editDescription').value = todo.description || '';
+            document.getElementById('editStatus').value = todo.status;
+
+            if (todo.deadline) {
+                const deadline = new Date(todo.deadline);
+                // Format for datetime-local input (YYYY-MM-DDTHH:MM)
+                const deadlineFormatted = deadline.toISOString().slice(0, 16);
+                document.getElementById('editDeadline').value = deadlineFormatted;
+            } else {
+                document.getElementById('editDeadline').value = '';
+            }
+
+            document.getElementById('editTodoModal').classList.add('active');
+        }
+
+        async function updateTodo(event) {
+            event.preventDefault();
+            const id = document.getElementById('editTodoId').value;
+            const title = document.getElementById('editTitle').value;
+            const description = document.getElementById('editDescription').value;
+            const status = document.getElementById('editStatus').value;
+            const deadline = document.getElementById('editDeadline').value;
+
+            const todoData = { title, description, status };
+            if (deadline) {
+                const deadlineDate = new Date(deadline);
+                todoData.deadline = deadlineDate.toISOString();
+            }
+
+            await fetch(`${API_BASE}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(todoData),
+            });
+
+            document.getElementById('editTodoForm').reset();
+            document.getElementById('editTodoModal').classList.remove('active');
+            fetchTodos();
+        }
+
         async function addTodo(event) {
             event.preventDefault();
             const title = document.getElementById('title').value;
@@ -1038,9 +1113,19 @@
             document.getElementById('todoModal').classList.remove('active');
         });
 
+        document.getElementById('closeEditModal').addEventListener('click', () => {
+            document.getElementById('editTodoModal').classList.remove('active');
+        });
+
         document.getElementById('todoModal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('todoModal')) {
                 document.getElementById('todoModal').classList.remove('active');
+            }
+        });
+
+        document.getElementById('editTodoModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('editTodoModal')) {
+                document.getElementById('editTodoModal').classList.remove('active');
             }
         });
 
@@ -1063,6 +1148,7 @@
         }
 
         document.getElementById('addTodoForm').addEventListener('submit', addTodo);
+        document.getElementById('editTodoForm').addEventListener('submit', updateTodo);
 
         document.getElementById('toggleCompleted').addEventListener('change', () => {
             fetchTodos();
