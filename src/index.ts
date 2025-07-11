@@ -10,6 +10,10 @@ app.use(express.json());
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../public')));
 
+function logDebug(message: string, ...args: any[]) {
+  console.log(`[DEBUG] ${message}`, ...args);
+}
+
 // Todo interface
 interface Todo {
   id: number;
@@ -30,6 +34,7 @@ let nextId = 1;
 // GET /api/todos - List all todos with optional status filter
 app.get('/api/todos', (req, res) => {
   const { status } = req.query;
+  logDebug('Fetching todos with status filter:', status);
 
   let filteredTodos = todos;
 
@@ -47,9 +52,12 @@ app.get('/api/todos', (req, res) => {
 // GET /api/todos/:id - Get specific todo
 app.get('/api/todos/:id', (req, res) => {
   const id = parseInt(req.params.id);
+  logDebug('Fetching todo with ID:', id);
+
   const todo = todos.find((t) => t.id === id);
 
   if (!todo) {
+    logDebug('Todo not found for ID:', id);
     return res.status(404).json({
       success: false,
       message: 'Todo not found',
@@ -65,8 +73,10 @@ app.get('/api/todos/:id', (req, res) => {
 // POST /api/todos - Add new todo
 app.post('/api/todos', (req, res) => {
   const { title, description, deadline } = req.body;
+  logDebug('Creating new todo with:', { title, description, deadline });
 
   if (!title) {
+    logDebug('Title is required for new todo');
     return res.status(400).json({
       success: false,
       message: 'Title is required',
@@ -92,7 +102,7 @@ app.post('/api/todos', (req, res) => {
   };
 
   todos.push(newTodo);
-
+  logDebug('New todo created:', newTodo);
   res.status(201).json({
     success: true,
     data: newTodo,
@@ -103,9 +113,12 @@ app.post('/api/todos', (req, res) => {
 // PUT /api/todos/:id - Update todo
 app.put('/api/todos/:id', (req, res) => {
   const id = parseInt(req.params.id);
+  logDebug('Updating todo with ID:', id);
+
   const todoIndex = todos.findIndex((t) => t.id === id);
 
   if (todoIndex === -1) {
+    logDebug('Todo not found for ID:', id);
     return res.status(404).json({
       success: false,
       message: 'Todo not found',
@@ -113,9 +126,11 @@ app.put('/api/todos/:id', (req, res) => {
   }
 
   const { title, description, status, deadline } = req.body;
+  logDebug('Updating todo with data:', { title, description, status, deadline });
 
   // Validate status if provided
   if (status && !['pending', 'in-progress', 'completed'].includes(status)) {
+    logDebug('Invalid status provided:', status);
     return res.status(400).json({
       success: false,
       message: 'Invalid status. Must be: pending, in-progress, or completed',
@@ -135,7 +150,7 @@ app.put('/api/todos/:id', (req, res) => {
     }
   }
   todos[todoIndex].updatedAt = new Date();
-
+  logDebug('Todo updated:', { todo: todos[todoIndex] });
   res.json({
     success: true,
     data: todos[todoIndex],
@@ -146,9 +161,12 @@ app.put('/api/todos/:id', (req, res) => {
 // DELETE /api/todos/:id - Delete todo
 app.delete('/api/todos/:id', (req, res) => {
   const id = parseInt(req.params.id);
+  logDebug('Deleting todo with ID:', id);
+
   const todoIndex = todos.findIndex((t) => t.id === id);
 
   if (todoIndex === -1) {
+    logDebug('Todo not found for ID:', id);
     return res.status(404).json({
       success: false,
       message: 'Todo not found',
@@ -166,8 +184,10 @@ app.delete('/api/todos/:id', (req, res) => {
 // GET /api/todos/status/:status - Filter todos by status
 app.get('/api/todos/status/:status', (req, res) => {
   const { status } = req.params;
+  logDebug('Filtering todos by status:', status);
 
   if (!['pending', 'in-progress', 'completed'].includes(status)) {
+    logDebug('Invalid status provided:', status);
     return res.status(400).json({
       success: false,
       message: 'Invalid status. Must be: pending, in-progress, or completed',
