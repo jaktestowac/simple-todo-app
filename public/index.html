@@ -616,6 +616,38 @@
             margin-bottom: 18px;
         }
 
+        .api-doc-section-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .api-doc-param-list {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+            list-style: none;
+        }
+
+        .api-doc-param-list li {
+            padding: 4px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .api-doc-param-list li:last-child {
+            border-bottom: none;
+        }
+
+        .api-doc-param-list li strong {
+            color: #333;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
         /* API Doc Modal fixed from top */
         .api-doc-modal-content {
             max-width: 900px;
@@ -789,13 +821,48 @@
                         html += `<div class="api-doc-title">${ep}</div>`;
                         html += `<div class="api-doc-description">${info.description}</div>`;
                         let paramsBody = '';
+                        // Determine HTTP method
+                        let method = '';
+                        if (ep.startsWith('GET')) method = 'GET';
+                        else if (ep.startsWith('POST')) method = 'POST';
+                        else if (ep.startsWith('PUT')) method = 'PUT';
+                        else if (ep.startsWith('DELETE')) method = 'DELETE';
+                        else if (ep.startsWith('PATCH')) method = 'PATCH';
+                        // Show parameters and body with clear labels
+                        let urlSection = '';
+                        let bodySection = '';
+
                         if (info.parameters) {
-                            paramsBody += `<div class='api-doc-param-block'><span class='api-doc-param-label'>Params:</span><pre class='api-doc-pre'>${JSON.stringify(info.parameters, null, 2)}</pre></div>`;
+                            // For GET endpoints, show as URL Parameters (separate from body)
+                            if (method === 'GET') {
+                                const paramType = ep.includes('/:') ? 'Path Parameters' : 'Query Parameters';
+                                const paramsList = Object.entries(info.parameters).map(([key, value]) => {
+                                    return `<li><strong>${key}:</strong> ${value}</li>`;
+                                }).join('');
+                                urlSection += `<div class='api-doc-param-block'><span class='api-doc-param-label'>${paramType}:</span><ul class='api-doc-param-list'>${paramsList}</ul></div>`;
+                            } else {
+                                bodySection += `<div class='api-doc-param-block'><span class='api-doc-param-label'>Parameters:</span><pre class='api-doc-pre'>${JSON.stringify(info.parameters, null, 2)}</pre></div>`;
+                            }
                         }
                         if (info.body) {
-                            paramsBody += `<div class='api-doc-body-block'><span class='api-doc-body-label'>Body:</span><pre class='api-doc-pre'>${JSON.stringify(info.body, null, 2)}</pre></div>`;
+                            bodySection += `<div class='api-doc-body-block'><span class='api-doc-body-label'>Request Body:</span><pre class='api-doc-pre'>${JSON.stringify(info.body, null, 2)}</pre></div>`;
                         }
-                        html += `<div class="api-doc-tab-section"><b>Params/Body:</b> ${paramsBody || '-'}</div>`;
+
+                        // Show URL parameters section for GET requests
+                        if (urlSection) {
+                            html += `<div class="api-doc-tab-section"><div class="api-doc-section-title">URL Parameters</div>${urlSection}</div>`;
+                        }
+
+                        // Show body/parameters section for non-GET requests
+                        if (bodySection) {
+                            const sectionTitle = method === 'GET' ? 'Parameters & Body' : 'Request Parameters & Body';
+                            html += `<div class="api-doc-tab-section"><div class="api-doc-section-title">${sectionTitle}</div>${bodySection}</div>`;
+                        }
+
+                        // If no parameters or body at all
+                        if (!urlSection && !bodySection) {
+                            html += `<div class="api-doc-tab-section"><div class="api-doc-section-title">Parameters & Body</div>-</div>`;
+                        }
                         // Example formatting
                         let exampleHtml = '-';
                         if (info.example) {
