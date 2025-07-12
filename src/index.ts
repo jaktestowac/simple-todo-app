@@ -220,11 +220,11 @@ app.get('/api/help', (req, res) => {
           example: 'GET /api/todos?status=pending',
         },
         'POST /api/todos': {
-          description: 'Create a new todo',
+          description: 'Create a new todo. Only title is required, description and deadline are optional.',
           body: {
             title: 'required - string',
             description: 'optional - string',
-            deadline: 'optional - string (ISO date)',
+            deadline: 'optional - string (ISO date format, e.g. "2025-07-31T23:59:59Z")',
           },
           example: '{"title": "Buy groceries", "description": "Milk, bread, eggs", "deadline": "2025-07-31T23:59:59Z"}',
         },
@@ -236,7 +236,7 @@ app.get('/api/help', (req, res) => {
           example: 'GET /api/todos/1',
         },
         'PUT /api/todos/:id': {
-          description: 'Update a todo',
+          description: 'Update a todo. All fields are optional - only provide the fields you want to update.',
           parameters: {
             id: 'required path parameter - number',
           },
@@ -244,7 +244,7 @@ app.get('/api/help', (req, res) => {
             title: 'optional - string',
             description: 'optional - string',
             status: 'optional - string (pending|in-progress|completed)',
-            deadline: 'optional - string (ISO date)',
+            deadline: 'optional - string (ISO date format, e.g. "2025-07-31T23:59:59Z")',
           },
           example: '{"status": "completed", "deadline": "2025-07-31T23:59:59Z"}',
         },
