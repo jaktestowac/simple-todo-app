@@ -12,7 +12,7 @@
 <body>
 
     <div class="container">
-        <h1>TODO App</h1>
+        <h1>TODO App <span id="appVersion" class="app-version"></span></h1>
         <div class="checkbox-container">
             <input type="checkbox" id="toggleCompleted">
             <label for="toggleCompleted">Show Completed Todos</label>
@@ -136,6 +136,7 @@
             <a href="https://github.com/jaktestowac" target="_blank" style="color:#4a5568; text-decoration:underline;">GitHub</a>
         </span>
         <span>for more projects!</span>
+        <span id="footerVersion" style="margin-left: 10px; color: #888; font-size: 9px;"></span>
     </footer>
 
 
@@ -644,7 +645,22 @@
 
         document.getElementById('generateTodosForm').addEventListener('submit', generateTodos);
 
+        // Fetch and display application version
+        async function fetchAppVersion() {
+            try {
+                const response = await fetch('/api/about');
+                const data = await response.json();
+                if (data.success && data.data.version) {
+                    document.getElementById('appVersion').textContent = `v${data.data.version}`;
+                    document.getElementById('footerVersion').textContent = `v${data.data.version}`;
+                }
+            } catch (error) {
+                console.log('Could not fetch version:', error);
+            }
+        }
+
         fetchTodos();
+        fetchAppVersion();
 
         // Toggle creation days input based on randomize checkbox
         document.getElementById('generateRandomizeCreation').addEventListener('change', function () {

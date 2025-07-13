@@ -6,6 +6,10 @@ import { TodoGeneratorService } from './services/todoGeneratorService';
 const app = express();
 const PORT = process.env.PORT || 3013;
 
+// Read version from package.json
+const packageJson = require('../package.json');
+const APP_VERSION = packageJson.version;
+
 // Middleware
 app.use(express.json());
 // Serve static files from the public directory
@@ -210,7 +214,7 @@ app.get('/api/help', (req, res) => {
     success: true,
     data: {
       title: 'TODO App API Documentation',
-      version: '1.0.0',
+      version: APP_VERSION,
       description: 'A simple REST API for managing TODO items',
       endpoints: {
         'GET /api/todos': {
@@ -298,9 +302,9 @@ app.get('/api/about', (req, res) => {
     success: true,
     data: {
       name: 'TODO App API',
-      version: '1.0.0',
+      version: APP_VERSION,
       description: 'A simple REST API for managing TODO App items with status tracking',
-      author: 'Your Name',
+      author: 'jaktestowac.pl',
       created: '2025-07-05',
       features: [
         'Create, read, update, delete todos',
@@ -308,6 +312,8 @@ app.get('/api/about', (req, res) => {
         'Filter todos by status',
         'In-memory storage',
         'RESTful API design',
+        'Sample todo generation',
+        'Deadline tracking',
       ],
       technology: {
         runtime: 'Node.js',
@@ -374,6 +380,7 @@ const server = app.listen(PORT, () => {
   var address = server.address();
   if (address && typeof address === 'object') {
     address = address.address == '::' ? 'localhost' : address.address;
+    console.log(`\n🚀 TODO App API v${APP_VERSION} is running!`);
     console.log(`Visit it on -> http://${address}:${PORT}`);
     console.log(`Server is running on port ${PORT}`);
     console.log('\nAPI Endpoints:');

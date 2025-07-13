@@ -37,6 +37,15 @@ h1 {
   background-clip: text;
 }
 
+.app-version {
+  font-size: 0.4em;
+  opacity: 0.7;
+  font-weight: 400;
+  color: #764ba2;
+  -webkit-text-fill-color: #764ba2;
+  background: none;
+}
+
 h2 {
   text-align: center;
   color: #4a5568;
