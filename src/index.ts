@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import { TodoGeneratorService } from './services/todoGeneratorService';
 
 const app = express();
 const PORT = process.env.PORT || 3013;
@@ -262,6 +263,20 @@ app.get('/api/help', (req, res) => {
           },
           example: 'GET /api/todos/status/completed',
         },
+        'POST /api/todos/generate': {
+          description: 'Generate sample todos from predefined templates',
+          body: {
+            count: 'optional - number (1-15, default: 1)',
+            status: 'optional - string (pending|in-progress|completed)',
+            titleKeywords: 'optional - array of strings to filter templates',
+            maxDeadlineDays: 'optional - number (maximum deadline days from now)',
+          },
+          example: '{"count": 3, "status": "pending", "titleKeywords": ["review", "test"]}',
+        },
+        'GET /api/todos/generate/info': {
+          description: 'Get information about todo generator capabilities and statistics',
+          example: 'GET /api/todos/generate/info',
+        },
       },
       statusCodes: {
         '200': 'Success',
@@ -297,10 +312,58 @@ app.get('/api/about', (req, res) => {
         language: 'TypeScript',
       },
       endpoints: {
-        total: 8,
-        available: ['/api/todos', '/api/todos/:id', '/api/todos/status/:status', '/api/help', '/api/about'],
+        total: 9,
+        available: [
+          '/api/todos',
+          '/api/todos/:id',
+          '/api/todos/status/:status',
+          '/api/todos/generate',
+          '/api/help',
+          '/api/about',
+        ],
       },
     },
+  });
+});
+
+// POST /api/todos/generate - Generate sample todos
+app.post('/api/todos/generate', (req, res) => {
+  logDebug('Generating todos with params:', req.body);
+
+  // Validate request
+  const validation = TodoGeneratorService.validateRequest(req.body);
+  if (!validation.valid) {
+    return res.status(400).json({
+      success: false,
+      message: validation.error,
+    });
+  }
+
+  // Generate todos using the service
+  const nextIdRef = { value: nextId };
+  const result = TodoGeneratorService.generateTodos(req.body, nextIdRef, todos);
+
+  // Update nextId
+  nextId = nextIdRef.value;
+
+  if (result.success) {
+    logDebug('Generated todos:', result.data);
+    res.status(201).json(result);
+  } else {
+    res.status(400).json(result);
+  }
+});
+
+// GET /api/todos/generate/info - Get todo generator information
+app.get('/api/todos/generate/info', (req, res) => {
+  logDebug('Getting todo generator information');
+
+  const info = TodoGeneratorService.getGenerationInfo();
+
+  res.json({
+    success: true,
+    data: info,
+    message: 'Todo generator information retrieved successfully',
   });
 });
 
@@ -317,6 +380,8 @@ const server = app.listen(PORT, () => {
     console.log('DELETE /api/todos/:id - Delete todo');
     console.log('GET    /api/todos/:id - Get specific todo');
     console.log('GET    /api/todos/status/:status - Filter by status');
+    console.log('POST   /api/todos/generate - Generate sample todos');
+    console.log('GET    /api/todos/generate/info - Get generator information');
     console.log('GET    /api/help - API documentation');
     console.log('GET    /api/about - API information');
   }

@@ -6,714 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple TODO App</title>
     <link rel="icon" type="image/png" href="/todo-icon.png">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: baseline;
-        }
-
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        h1 {
-            text-align: center;
-            color: #2d3748;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        h2 {
-            text-align: center;
-            color: #4a5568;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin: 25px 0 15px 0;
-        }
-
-        .todo {
-            background: white;
-            border-radius: 12px;
-            padding: 10px;
-            margin: 10px 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            position: relative;
-            word-break: break-word;
-            overflow-wrap: anywhere;
-        }
-
-        .todo:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-        }
-
-        .todo.completed {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
-            border-left: 4px solid #28a745;
-        }
-
-        .todo.in-progress {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            border-left: 4px solid #ffc107;
-        }
-
-        .todo.pending {
-            background: linear-gradient(135deg, #ffeced 0%, #f3d5d8 100%);
-            border-left: 4px solid #dc3545;
-        }
-
-        .todo.deadline-today {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            border-left: 4px solid #ffc107;
-            border-right: 4px solid #ffc107;
-        }
-
-        .todo.deadline-overdue {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            border-left: 4px solid #dc3545;
-            border-right: 4px solid #dc3545;
-            animation: pulse-red 2s infinite;
-        }
-
-        @keyframes pulse-red {
-            0% {
-                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
-            }
-
-            50% {
-                box-shadow: 0 4px 20px rgba(220, 53, 69, 0.3);
-            }
-
-            100% {
-                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.1);
-            }
-        }
-
-        .todo h3 {
-            color: #2d3748;
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-            font-weight: 600;
-            word-break: break-word;
-            overflow-wrap: anywhere;
-        }
-
-        .todo p {
-            color: #4a5568;
-            margin-bottom: 8px;
-            line-height: 1.5;
-            word-break: break-word;
-            overflow-wrap: anywhere;
-        }
-
-        .status-badge {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            display: inline-block;
-            padding: 1px 6px;
-            border-radius: 8px;
-            font-size: 9px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
-        }
-
-        .status-badge.completed {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-        }
-
-        .status-badge.in-progress {
-            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-            color: white;
-        }
-
-        .status-badge.pending {
-            background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
-            color: white;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        input,
-        textarea,
-        select {
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-            font-family: inherit;
-        }
-
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .todo-actions {
-            display: flex;
-            gap: 2px;
-            margin-top: 8px;
-            flex-wrap: nowrap;
-        }
-
-        .todo-actions button {
-            font-size: 10px;
-            padding: 4px 6px;
-            flex: 1;
-            min-width: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .todo-actions button:first-child {
-            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
-        }
-
-        .todo-actions button:last-child {
-            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
-        }
-
-        #toggleCompleted {
-            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            position: relative;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-close:hover {
-            color: #333;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .add-todo-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            z-index: 10000;
-        }
-
-        .add-todo-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-        }
-
-        .modal h2 {
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .checkbox-container input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: #667eea;
-            cursor: pointer;
-        }
-
-        .checkbox-container label {
-            font-weight: 500;
-            color: #4a5568;
-            cursor: pointer;
-        }
-
-        .compact-add-btn {
-            width: 100%;
-            padding: 10px 16px;
-            margin: 20px 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
-        }
-
-        .compact-add-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .no-todos {
-            text-align: center;
-            color: #718096;
-            font-style: italic;
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 10px;
-            border: 2px dashed #cbd5e0;
-        }
-
-        .compact-list .todo {
-            padding: 2px 4px;
-            margin: 2px 0;
-            border-radius: 5px;
-            font-size: 11px;
-            min-height: unset;
-        }
-
-        .compact-list .todo h3 {
-            font-size: 0.92rem;
-            margin-bottom: 2px;
-            font-weight: 500;
-        }
-
-        .compact-list .todo p {
-            font-size: 10px;
-            margin-bottom: 2px;
-        }
-
-        .compact-list .status-badge {
-            font-size: 7px;
-            padding: 0 4px;
-            top: 2px;
-            right: 2px;
-        }
-
-        .compact-list .todo-actions {
-            gap: 1px;
-            margin-top: 2px;
-        }
-
-        .compact-list .todo-actions button {
-            font-size: 9px;
-            padding: 2px 3px;
-            min-width: 0;
-        }
-
-        .compact-list .todo-actions button {
-            border-radius: 4px;
-        }
-
-        .compact-list .todo div[style*="font-size: 11px"] {
-            font-size: 9px !important;
-            margin-bottom: 1px !important;
-            gap: 4px !important;
-        }
-
-        .api-doc-loading {
-            text-align: center;
-            color: #888;
-        }
-
-        .api-doc-title {
-            font-size: 1.1em;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .api-doc-version {
-            color: #888;
-            font-size: 0.95em;
-            font-weight: 400;
-        }
-
-        .api-doc-description {
-            margin-bottom: 14px;
-            color: #555;
-        }
-
-        .api-doc-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 16px;
-            font-size: 13px;
-        }
-
-        .api-doc-th {
-            text-align: left;
-            padding: 6px 8px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .api-doc-th-params {
-            min-width: 180px;
-        }
-
-        .api-doc-table-header-row {
-            background: #f3f3fa;
-        }
-
-        .api-doc-table-row {
-            border-bottom: 1px solid #f0f0f0;
-            vertical-align: top;
-        }
-
-        .api-doc-td {
-            padding: 6px 8px;
-        }
-
-        .api-doc-endpoint {
-            font-family: monospace;
-            color: #764ba2;
-        }
-
-        .api-doc-param-block {
-            margin-bottom: 4px;
-        }
-
-        .api-doc-param-label,
-        .api-doc-body-label {
-            color: #555;
-            font-weight: 500;
-        }
-
-        .api-doc-body-block {
-            margin-bottom: 0;
-        }
-
-        .api-doc-pre {
-            background: #f8f8fa;
-            border-radius: 5px;
-            padding: 5px 8px;
-            margin: 2px 0 0 0;
-            font-size: 12px;
-            color: #333;
-            white-space: pre-wrap;
-            font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-        }
-
-        .api-doc-method {
-            font-weight: 800;
-            color: #764ba2;
-        }
-
-        .api-doc-endpoint-path {
-            font-family: monospace;
-            color: #2d3748;
-        }
-
-        .api-doc-status-codes {
-            margin-top: 10px;
-        }
-
-        .api-doc-status-list {
-            margin: 6px 0 0 0;
-            padding-left: 18px;
-        }
-
-        .deadline-indicator {
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 8px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .deadline-today {
-            background: #ffc107;
-            color: white;
-        }
-
-        .deadline-overdue {
-            background: #dc3545;
-            color: white;
-        }
-
-        .deadline-due {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .deadline-upcoming {
-            background: #28a745;
-            color: white;
-        }
-
-        /* Tabs for API doc */
-        .api-doc-tabs {
-            margin-top: 18px;
-        }
-
-        .api-doc-tab-list {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 0;
-            margin-bottom: 0;
-            border-bottom: 2px solid #e2e8f0;
-            background: #f8f8fa;
-            border-radius: 10px 10px 0 0;
-            overflow-x: auto;
-            max-height: 40px;
-        }
-
-        .api-doc-tab-btn {
-            background: none;
-            border: none;
-            border-radius: 8px 8px 0 0;
-            padding: 6px 14px 5px 14px;
-            font-size: 13px;
-            color: #764ba2;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-            outline: none;
-            border-bottom: 2px solid transparent;
-            margin-right: 2px;
-            margin-bottom: -2px;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 1px 2px rgba(102, 126, 234, 0.04);
-            max-width: 180px;
-            min-width: 0;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .api-doc-tab-btn:not(.active):hover {
-            background: #e4def5;
-            color: #5a3d8c;
-        }
-
-        .api-doc-tab-btn.active {
-            background: #fff;
-            color: #2d3748;
-            border-bottom: 4px solid #764ba2;
-            z-index: 2;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
-        }
-
-        .api-doc-tab-panel {
-            display: none;
-            padding: 22px 0 12px 0;
-            border-radius: 0 0 10px 10px;
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.04);
-            border-top: none;
-            margin-top: 0;
-        }
-
-        .api-doc-tab-panel.active {
-            display: block;
-        }
-
-        .api-doc-tab-section {
-            margin-bottom: 18px;
-        }
-
-        .api-doc-section-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            padding-bottom: 4px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 14px;
-        }
-
-        .api-doc-param-list {
-            margin: 8px 0 0 0;
-            padding-left: 20px;
-            list-style: none;
-        }
-
-        .api-doc-param-list li {
-            padding: 4px 0;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 13px;
-            color: #555;
-        }
-
-        .api-doc-param-list li:last-child {
-            border-bottom: none;
-        }
-
-        .api-doc-param-list li strong {
-            color: #333;
-            font-weight: 600;
-            margin-right: 8px;
-        }
-
-        /* API Doc Modal fixed from top */
-        .api-doc-modal-content {
-            max-width: 900px;
-            min-width: 340px;
-            width: 90vw;
-            min-height: 60vh;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: fixed;
-            top: 48px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .todo-controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 10px;
-            margin-top: 10px;
-        }
-
-        .todo-controls-btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            color: #fff;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
-            transition: background 0.2s, box-shadow 0.2s, color 0.2s;
-            flex: 0 0 auto;
-        }
-
-        .todo-controls-btn:hover {
-            background: linear-gradient(135deg, #5a3d8c 0%, #667eea 100%);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.18);
-        }
-
-        .todo-controls-add {
-            flex: 1 1 auto;
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .todo-controls-refresh {
-            font-size: 15px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .todo-controls-compact {
-            font-size: 15px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-        }
-
-        .todo-controls-api {
-            font-size: 15px;
-            font-weight: 600;
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        }
-    </style>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body>
@@ -728,6 +21,7 @@
             <button class="todo-controls-btn todo-controls-add" id="compactAddBtn">+ Add New Todo</button>
             <button class="todo-controls-btn todo-controls-refresh" id="refreshTodosBtn" title="Refresh">&#x21bb;</button>
             <button class="todo-controls-btn todo-controls-compact" id="toggleCompactListBtn" title="Toggle Compact List">&#9776;</button>
+            <button class="todo-controls-btn todo-controls-generate" id="generateTodosBtn" title="Generate Sample TODOs">🎲</button>
             <button class="todo-controls-btn todo-controls-api" id="showApiDocBtn" title="API Documentation">API</button>
         </div>
 
@@ -738,7 +32,7 @@
     <div class="modal" id="apiDocModal">
         <div class="modal-content api-doc-modal-content">
             <button class="modal-close" id="closeApiDocModal">&times;</button>
-            <h2 style="margin-bottom:10px;">API Documentation</h2>
+            <h2 style="margin-bottom:10px; margin-top: 0px;">API Documentation</h2>
             <div id="apiDocContent" style="font-size:14px; color:#333;"></div>
         </div>
     </div>
@@ -768,13 +62,12 @@
             <button class="modal-close" id="closeEditModal">&times;</button>
             <h2>Edit Todo</h2>
             <form id="editTodoForm">
-                <input type="hidden" id="editTodoId">
                 <input type="text" id="editTitle" placeholder="Title" required>
                 <label for="editDescription" style="font-size: 12px; color: #666; margin-bottom: -15px; display: block;">Description (optional)</label>
                 <textarea id="editDescription" placeholder="Description"></textarea>
                 <label for="editDeadline" style="font-size: 12px; color: #666; margin-bottom: -15px; display: block;">Deadline (optional)</label>
                 <input type="datetime-local" id="editDeadline" placeholder="Deadline (optional)" title="Select a deadline date and time (optional)">
-                <select id="editStatus">
+                <select id="editStatus" required>
                     <option value="pending">Pending</option>
                     <option value="in-progress">In Progress</option>
                     <option value="completed">Completed</option>
@@ -784,9 +77,37 @@
         </div>
     </div>
 
+    <!-- Generate TODOs Modal -->
+    <div class="modal" id="generateModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeGenerateModal">&times;</button>
+            <h2>Generate Sample TODOs</h2>
+            <form id="generateTodosForm">
+                <label for="generateCount">Number of TODOs (1-15):</label>
+                <input type="number" id="generateCount" min="1" max="15" value="3" required>
+
+                <label for="generateStatus">Status (optional):</label>
+                <select id="generateStatus">
+                    <option value="">Any Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+
+                <label for="generateKeywords">Keywords (optional, comma-separated):</label>
+                <input type="text" id="generateKeywords" placeholder="e.g., review, test, documentation">
+
+                <label for="generateMaxDays">Max deadline days (optional):</label>
+                <input type="number" id="generateMaxDays" min="1" max="365" placeholder="e.g., 30">
+
+                <button type="submit">Generate TODOs</button>
+            </form>
+        </div>
+    </div>
+
 
     <!-- Footer -->
-    <footer style="position:fixed; left:0; bottom:0; width:100vw; text-align:center; color:#666; font-size:15px; background:rgba(255,255,255,0.92); border-radius:0; padding:14px 0 8px 0; box-shadow:0 -2px 12px rgba(102,126,234,0.10); z-index:999; pointer-events:auto;">
+    <footer style="font-size: 10px !important; position:fixed; left:0; bottom:0; width:100vw; text-align:center; color:#666; font-size:15px; background:rgba(255,255,255,0.92); border-radius:0; padding:6px 0 6px 0; box-shadow:0 -2px 12px rgba(102,126,234,0.10); z-index:999; pointer-events:auto;">
         <span style="margin-bottom:4px;">
             Built with <span style="color:#764ba2;">&#10084;&#65039;</span> by <a href="https://jaktestowac.pl" target="_blank" style="color:#667eea; text-decoration:none; font-weight:600;">jaktestowac.pl</a>
         </span><span> - visit our</span>
@@ -1231,6 +552,70 @@
         document.getElementById('toggleCompactListBtn').addEventListener('click', () => {
             document.body.classList.toggle('compact-list');
         });
+
+        // Generate TODOs functionality
+        document.getElementById('generateTodosBtn').addEventListener('click', () => {
+            document.getElementById('generateModal').classList.add('active');
+        });
+
+        document.getElementById('closeGenerateModal').addEventListener('click', () => {
+            document.getElementById('generateModal').classList.remove('active');
+        });
+
+        document.getElementById('generateModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('generateModal')) {
+                document.getElementById('generateModal').classList.remove('active');
+            }
+        });
+
+        async function generateTodos(event) {
+            event.preventDefault();
+
+            const count = parseInt(document.getElementById('generateCount').value);
+            const status = document.getElementById('generateStatus').value || undefined;
+            const keywordsInput = document.getElementById('generateKeywords').value.trim();
+            const maxDays = document.getElementById('generateMaxDays').value ?
+                parseInt(document.getElementById('generateMaxDays').value) : undefined;
+
+            const titleKeywords = keywordsInput ?
+                keywordsInput.split(',').map(k => k.trim()).filter(k => k.length > 0) : undefined;
+
+            const requestBody = {
+                count,
+                status,
+                titleKeywords,
+                maxDeadlineDays: maxDays
+            };
+
+            try {
+                const response = await fetch('/api/todos/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('generateTodosForm').reset();
+                    document.getElementById('generateModal').classList.remove('active');
+                    fetchTodos(); // Refresh the todo list
+
+                    // Show success message (you can enhance this)
+                    console.log(`Generated ${result.data.length} TODOs successfully`);
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error generating TODOs:', error);
+                alert('Failed to generate TODOs. Please try again.');
+            }
+        }
+
+        document.getElementById('generateTodosForm').addEventListener('submit', generateTodos);
+
         fetchTodos();
     </script>
 </body>
