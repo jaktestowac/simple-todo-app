@@ -23,7 +23,6 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Update dependencies',
     description: 'Check for outdated npm packages and update to latest versions',
     status: 'pending',
-    deadlineInDays: 14,
   },
   {
     title: 'Write unit tests',
@@ -35,7 +34,6 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Database backup',
     description: 'Create automated backup script for production database',
     status: 'pending',
-    deadlineInDays: 10,
   },
   {
     title: 'Performance optimization',
@@ -47,7 +45,6 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Security audit',
     description: 'Conduct security review of authentication and authorization systems',
     status: 'pending',
-    deadlineInDays: 30,
   },
   {
     title: 'User interface improvements',
@@ -59,7 +56,6 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'API documentation',
     description: 'Create comprehensive API documentation with examples',
     status: 'in-progress',
-    deadlineInDays: 7,
   },
   {
     title: 'Code review process',
@@ -71,7 +67,6 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Monitor system metrics',
     description: 'Set up monitoring dashboards for system health and performance',
     status: 'pending',
-    deadlineInDays: 12,
   },
   {
     title: 'Customer feedback analysis',
@@ -83,13 +78,11 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Refactor legacy code',
     description: 'Clean up and modernize old codebase sections',
     status: 'pending',
-    deadlineInDays: 28,
   },
   {
     title: 'Team meeting notes',
     description: 'Document key decisions and action items from weekly team meeting',
     status: 'completed',
-    deadlineInDays: 1,
   },
   {
     title: 'Deploy to staging',
@@ -107,13 +100,11 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Write Playwright E2E tests',
     description: 'Create comprehensive end-to-end tests for critical user journeys',
     status: 'pending',
-    deadlineInDays: 14,
   },
   {
     title: 'Learn Playwright best practices',
     description: 'Study Playwright documentation and implement testing best practices',
     status: 'pending',
-    deadlineInDays: 10,
   },
   {
     title: 'Automate visual regression testing',
@@ -125,7 +116,6 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Cross-browser testing automation',
     description: 'Configure Playwright to run tests across Chrome, Firefox, and Safari',
     status: 'pending',
-    deadlineInDays: 8,
   },
   {
     title: 'API testing with Playwright',
@@ -137,13 +127,11 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Mobile testing automation',
     description: 'Set up mobile device emulation tests with Playwright',
     status: 'pending',
-    deadlineInDays: 15,
   },
   {
     title: 'Learn TypeScript advanced features',
     description: 'Study generics, decorators, and advanced type manipulation in TypeScript',
     status: 'pending',
-    deadlineInDays: 21,
   },
   {
     title: 'Master React testing patterns',
@@ -155,7 +143,6 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Study CI/CD automation',
     description: 'Learn GitHub Actions and automated deployment pipelines',
     status: 'pending',
-    deadlineInDays: 20,
   },
   {
     title: 'Test automation reporting',
@@ -167,13 +154,11 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Performance testing automation',
     description: 'Implement automated performance tests and benchmarking',
     status: 'pending',
-    deadlineInDays: 16,
   },
   {
     title: 'Learn Docker containerization',
     description: 'Study Docker fundamentals and containerization best practices',
     status: 'pending',
-    deadlineInDays: 25,
   },
   {
     title: 'Accessibility testing automation',
@@ -185,7 +170,6 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Database testing strategies',
     description: 'Learn database mocking and integration testing approaches',
     status: 'pending',
-    deadlineInDays: 13,
   },
   {
     title: 'Parallel test execution',
@@ -197,19 +181,16 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Learn GraphQL testing',
     description: 'Study GraphQL query testing and schema validation techniques',
     status: 'pending',
-    deadlineInDays: 19,
   },
   {
     title: 'Test data management',
     description: 'Implement test data factories and database seeding strategies',
     status: 'pending',
-    deadlineInDays: 14,
   },
   {
     title: 'Learn Kubernetes basics',
     description: 'Study container orchestration and Kubernetes deployment concepts',
     status: 'pending',
-    deadlineInDays: 30,
   },
   {
     title: 'Configure Playwright CI/CD pipeline',
@@ -221,19 +202,16 @@ const TODO_TEMPLATES: TodoTemplate[] = [
     title: 'Implement Playwright page object model',
     description: 'Refactor tests using Page Object Model pattern for better maintainability',
     status: 'pending',
-    deadlineInDays: 12,
   },
   {
     title: 'Explore Playwright resources',
     description: 'Study examples and best practices from https://playwright.info',
     status: 'pending',
-    deadlineInDays: 5,
   },
   {
     title: 'Advanced Playwright automation patterns',
     description: 'Master advanced automation and solutions from https://playwright.info',
     status: 'pending',
-    deadlineInDays: 16,
   },
 ];
 
