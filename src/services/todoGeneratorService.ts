@@ -1,4 +1,4 @@
-import { todoGenerator, TodoTemplate } from '../todoGenerator';
+import { todoGenerator, TodoTemplate, TodoGenerator } from '../todoGenerator';
 
 // Todo interface - replicating from main file to avoid circular dependency
 interface Todo {
@@ -16,6 +16,8 @@ export interface GenerateTodosRequest {
   status?: 'pending' | 'in-progress' | 'completed';
   titleKeywords?: string[];
   maxDeadlineDays?: number;
+  randomizeCreationDate?: boolean;
+  maxCreationDaysAgo?: number;
 }
 
 export interface GenerateTodosResponse {
@@ -37,7 +39,7 @@ export class TodoGeneratorService {
     todosArray: Todo[]
   ): GenerateTodosResponse {
     try {
-      const { count = 1, status, titleKeywords, maxDeadlineDays } = request;
+      const { count = 1, status, titleKeywords, maxDeadlineDays, randomizeCreationDate, maxCreationDaysAgo } = request;
 
       // Validate count
       if (count > this.MAX_GENERATION_COUNT) {
@@ -60,10 +62,18 @@ export class TodoGeneratorService {
 
       if (count === 1) {
         // Generate single todo with custom options
-        generatedTemplates = [this.generateSingleTodo({ status, titleKeywords, maxDeadlineDays })];
+        generatedTemplates = [
+          this.generateSingleTodo({
+            status,
+            titleKeywords,
+            maxDeadlineDays,
+            randomizeCreationDate,
+            maxCreationDaysAgo,
+          }),
+        ];
       } else {
         // Generate multiple random todos
-        generatedTemplates = this.generateMultipleTodos(count);
+        generatedTemplates = this.generateMultipleTodos(count, randomizeCreationDate, maxCreationDaysAgo);
       }
 
       // Convert templates to actual todos
@@ -90,6 +100,8 @@ export class TodoGeneratorService {
     status?: 'pending' | 'in-progress' | 'completed';
     titleKeywords?: string[];
     maxDeadlineDays?: number;
+    randomizeCreationDate?: boolean;
+    maxCreationDaysAgo?: number;
   }): TodoTemplate {
     return todoGenerator.generateCustomTodo(options);
   }
@@ -97,8 +109,12 @@ export class TodoGeneratorService {
   /**
    * Generate multiple random todos
    */
-  private static generateMultipleTodos(count: number): TodoTemplate[] {
-    return todoGenerator.generateMultipleTodos(count);
+  private static generateMultipleTodos(
+    count: number,
+    randomizeCreationDate?: boolean,
+    maxCreationDaysAgo?: number
+  ): TodoTemplate[] {
+    return todoGenerator.generateMultipleTodos(count, randomizeCreationDate, maxCreationDaysAgo);
   }
 
   /**
@@ -111,13 +127,27 @@ export class TodoGeneratorService {
       deadline.setDate(deadline.getDate() + template.deadlineInDays);
     }
 
+    // Determine creation date - use randomized date if specified, otherwise current date
+    let createdAt: Date;
+    let updatedAt: Date;
+
+    if (template.createdDaysAgo !== undefined) {
+      createdAt = TodoGenerator.generateCreationDate(template.createdDaysAgo);
+      // Updated date should be between creation date and now
+      const daysSinceCreation = Math.floor(Math.random() * template.createdDaysAgo);
+      updatedAt = TodoGenerator.generateCreationDate(daysSinceCreation);
+    } else {
+      createdAt = new Date();
+      updatedAt = new Date();
+    }
+
     const todo: Todo = {
       id: nextIdRef.value++,
       title: template.title,
       description: template.description,
       status: template.status || 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt,
+      updatedAt,
       deadline,
     };
 
@@ -141,7 +171,13 @@ export class TodoGeneratorService {
         'Filter by title keywords',
         'Set maximum deadline days',
         'Automatic deadline calculation',
+        'Randomize creation dates',
+        'Set maximum creation days ago',
       ],
+      randomizationOptions: {
+        randomizeCreationDate: 'boolean - Enable/disable creation date randomization',
+        maxCreationDaysAgo: 'number - Maximum days ago for creation date (default: 30)',
+      },
     };
   }
 
@@ -149,7 +185,7 @@ export class TodoGeneratorService {
    * Validate generation request parameters
    */
   static validateRequest(request: GenerateTodosRequest): { valid: boolean; error?: string } {
-    const { count, status, titleKeywords, maxDeadlineDays } = request;
+    const { count, status, titleKeywords, maxDeadlineDays, randomizeCreationDate, maxCreationDaysAgo } = request;
 
     if (count !== undefined) {
       if (typeof count !== 'number' || count < 1 || count > this.MAX_GENERATION_COUNT) {
@@ -178,6 +214,20 @@ export class TodoGeneratorService {
       return {
         valid: false,
         error: 'maxDeadlineDays must be a positive number',
+      };
+    }
+
+    if (randomizeCreationDate !== undefined && typeof randomizeCreationDate !== 'boolean') {
+      return {
+        valid: false,
+        error: 'randomizeCreationDate must be a boolean',
+      };
+    }
+
+    if (maxCreationDaysAgo !== undefined && (typeof maxCreationDaysAgo !== 'number' || maxCreationDaysAgo < 1)) {
+      return {
+        valid: false,
+        error: 'maxCreationDaysAgo must be a positive number',
       };
     }
 

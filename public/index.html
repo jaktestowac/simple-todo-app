@@ -83,22 +83,42 @@
             <button class="modal-close" id="closeGenerateModal">&times;</button>
             <h2>Generate Sample TODOs</h2>
             <form id="generateTodosForm">
-                <label for="generateCount">Number of TODOs (1-15):</label>
-                <input type="number" id="generateCount" min="1" max="15" value="3" required>
+                <div class="form-row">
+                    <div>
+                        <label for="generateCount">Count (1-15):</label>
+                        <input type="number" id="generateCount" min="1" max="15" value="3" required>
+                    </div>
+                    <div>
+                        <label for="generateStatus">Status:</label>
+                        <select id="generateStatus">
+                            <option value="">Any Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
 
-                <label for="generateStatus">Status (optional):</label>
-                <select id="generateStatus">
-                    <option value="">Any Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                </select>
+                <div class="form-full">
+                    <label for="generateKeywords">Keywords (comma-separated):</label>
+                    <input type="text" id="generateKeywords" style="width: 100%;" placeholder="e.g., review, test, documentation">
+                </div>
 
-                <label for="generateKeywords">Keywords (optional, comma-separated):</label>
-                <input type="text" id="generateKeywords" placeholder="e.g., review, test, documentation">
+                <div class="form-row">
+                    <div>
+                        <label for="generateMaxDays">Max deadline days:</label>
+                        <input type="number" id="generateMaxDays" min="1" max="365" placeholder="e.g., 30">
+                    </div>
+                    <div>
+                        <label for="generateMaxCreationDays">Max creation days ago:</label>
+                        <input type="number" id="generateMaxCreationDays" min="1" max="365" placeholder="e.g., 30">
+                    </div>
+                </div>
 
-                <label for="generateMaxDays">Max deadline days (optional):</label>
-                <input type="number" id="generateMaxDays" min="1" max="365" placeholder="e.g., 30">
+                <div class="checkbox-row">
+                    <input type="checkbox" id="generateRandomizeCreation">
+                    <label for="generateRandomizeCreation">Randomize creation dates (spread TODOs over past days)</label>
+                </div>
 
                 <button type="submit">Generate TODOs</button>
             </form>
@@ -576,6 +596,9 @@
             const keywordsInput = document.getElementById('generateKeywords').value.trim();
             const maxDays = document.getElementById('generateMaxDays').value ?
                 parseInt(document.getElementById('generateMaxDays').value) : undefined;
+            const maxCreationDays = document.getElementById('generateMaxCreationDays').value ?
+                parseInt(document.getElementById('generateMaxCreationDays').value) : undefined;
+            const randomizeCreation = document.getElementById('generateRandomizeCreation').checked;
 
             const titleKeywords = keywordsInput ?
                 keywordsInput.split(',').map(k => k.trim()).filter(k => k.length > 0) : undefined;
@@ -584,7 +607,9 @@
                 count,
                 status,
                 titleKeywords,
-                maxDeadlineDays: maxDays
+                maxDeadlineDays: maxDays,
+                randomizeCreationDate: randomizeCreation,
+                maxCreationDaysAgo: maxCreationDays
             };
 
             try {
@@ -617,6 +642,32 @@
         document.getElementById('generateTodosForm').addEventListener('submit', generateTodos);
 
         fetchTodos();
+
+        // Toggle creation days input based on randomize checkbox
+        document.getElementById('generateRandomizeCreation').addEventListener('change', function () {
+            const maxCreationDaysInput = document.getElementById('generateMaxCreationDays');
+            if (this.checked) {
+                maxCreationDaysInput.disabled = false;
+                maxCreationDaysInput.style.opacity = '1';
+                maxCreationDaysInput.placeholder = 'e.g., 30 (default)';
+            } else {
+                maxCreationDaysInput.disabled = true;
+                maxCreationDaysInput.style.opacity = '0.5';
+                maxCreationDaysInput.placeholder = 'Enable randomization first';
+                maxCreationDaysInput.value = '';
+            }
+        });
+
+        // Initialize the state on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkbox = document.getElementById('generateRandomizeCreation');
+            const maxCreationDaysInput = document.getElementById('generateMaxCreationDays');
+
+            // Set initial state
+            maxCreationDaysInput.disabled = !checkbox.checked;
+            maxCreationDaysInput.style.opacity = checkbox.checked ? '1' : '0.5';
+            maxCreationDaysInput.placeholder = checkbox.checked ? 'e.g., 30 (default)' : 'Enable randomization first';
+        });
     </script>
 </body>
 

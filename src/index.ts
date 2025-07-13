@@ -270,8 +270,11 @@ app.get('/api/help', (req, res) => {
             status: 'optional - string (pending|in-progress|completed)',
             titleKeywords: 'optional - array of strings to filter templates',
             maxDeadlineDays: 'optional - number (maximum deadline days from now)',
+            randomizeCreationDate: 'optional - boolean (randomize creation dates, default: false)',
+            maxCreationDaysAgo: 'optional - number (maximum days ago for creation date, default: 30)',
           },
-          example: '{"count": 3, "status": "pending", "titleKeywords": ["review", "test"]}',
+          example:
+            '{"count": 3, "status": "pending", "titleKeywords": ["review", "test"], "randomizeCreationDate": true, "maxCreationDaysAgo": 14}',
         },
         'GET /api/todos/generate/info': {
           description: 'Get information about todo generator capabilities and statistics',
