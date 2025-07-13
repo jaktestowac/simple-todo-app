@@ -221,11 +221,11 @@ export class TodoGenerator {
   /**
    * Generate a single random TODO from templates
    */
-  generateRandomTodo(randomizeCreationDate?: boolean, maxCreationDaysAgo?: number): TodoTemplate {
+  generateRandomTodo(randomizeCreationDate: boolean = true, maxCreationDaysAgo?: number): TodoTemplate {
     const randomIndex = Math.floor(Math.random() * TODO_TEMPLATES.length);
     const selectedTemplate = { ...TODO_TEMPLATES[randomIndex] };
 
-    // Add random creation date if requested
+    // Add random creation date by default
     if (randomizeCreationDate) {
       selectedTemplate.createdDaysAgo = this.generateRandomCreationDaysAgo(maxCreationDaysAgo);
     }
@@ -236,7 +236,11 @@ export class TodoGenerator {
   /**
    * Generate multiple unique TODOs from templates
    */
-  generateMultipleTodos(count: number, randomizeCreationDate?: boolean, maxCreationDaysAgo?: number): TodoTemplate[] {
+  generateMultipleTodos(
+    count: number,
+    randomizeCreationDate: boolean = true,
+    maxCreationDaysAgo?: number
+  ): TodoTemplate[] {
     if (count > TODO_TEMPLATES.length) {
       throw new Error(`Cannot generate ${count} unique todos. Maximum available: ${TODO_TEMPLATES.length}`);
     }
@@ -250,7 +254,7 @@ export class TodoGenerator {
 
       const selectedTemplate = { ...TODO_TEMPLATES[templateIndex] };
 
-      // Add random creation date if requested
+      // Add random creation date by default
       if (randomizeCreationDate) {
         selectedTemplate.createdDaysAgo = this.generateRandomCreationDaysAgo(maxCreationDaysAgo);
       }
@@ -304,8 +308,9 @@ export class TodoGenerator {
     const randomIndex = Math.floor(Math.random() * filteredTemplates.length);
     const selectedTemplate = { ...filteredTemplates[randomIndex] };
 
-    // Add random creation date if requested
-    if (options.randomizeCreationDate) {
+    // Default to randomizing creation date unless explicitly disabled
+    const shouldRandomize = options.randomizeCreationDate !== false;
+    if (shouldRandomize) {
       selectedTemplate.createdDaysAgo = this.generateRandomCreationDaysAgo(options.maxCreationDaysAgo);
     }
 

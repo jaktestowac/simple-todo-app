@@ -111,7 +111,7 @@ export class TodoGeneratorService {
    */
   private static generateMultipleTodos(
     count: number,
-    randomizeCreationDate?: boolean,
+    randomizeCreationDate: boolean = true,
     maxCreationDaysAgo?: number
   ): TodoTemplate[] {
     return todoGenerator.generateMultipleTodos(count, randomizeCreationDate, maxCreationDaysAgo);
@@ -127,7 +127,7 @@ export class TodoGeneratorService {
       deadline.setDate(deadline.getDate() + template.deadlineInDays);
     }
 
-    // Determine creation date - use randomized date if specified, otherwise current date
+    // Determine creation date - randomize by default for more realistic data
     let createdAt: Date;
     let updatedAt: Date;
 
@@ -137,8 +137,12 @@ export class TodoGeneratorService {
       const daysSinceCreation = Math.floor(Math.random() * template.createdDaysAgo);
       updatedAt = TodoGenerator.generateCreationDate(daysSinceCreation);
     } else {
-      createdAt = new Date();
-      updatedAt = new Date();
+      // Default: randomize creation date within last 30 days
+      const randomDaysAgo = Math.floor(Math.random() * 30);
+      createdAt = TodoGenerator.generateCreationDate(randomDaysAgo);
+      // Updated date should be between creation date and now
+      const daysSinceCreation = Math.floor(Math.random() * randomDaysAgo);
+      updatedAt = TodoGenerator.generateCreationDate(daysSinceCreation);
     }
 
     const todo: Todo = {
@@ -175,7 +179,7 @@ export class TodoGeneratorService {
         'Set maximum creation days ago',
       ],
       randomizationOptions: {
-        randomizeCreationDate: 'boolean - Enable/disable creation date randomization',
+        randomizeCreationDate: 'boolean - Enable/disable creation date randomization (default: true)',
         maxCreationDaysAgo: 'number - Maximum days ago for creation date (default: 30)',
       },
     };
