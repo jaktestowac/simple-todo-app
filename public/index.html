@@ -62,6 +62,7 @@
             <button class="modal-close" id="closeEditModal">&times;</button>
             <h2>Edit Todo</h2>
             <form id="editTodoForm">
+                <input type="hidden" id="editTodoId">
                 <input type="text" id="editTitle" placeholder="Title" required>
                 <label for="editDescription" style="font-size: 12px; color: #666; margin-bottom: -15px; display: block;">Description (optional)</label>
                 <textarea id="editDescription" placeholder="Description"></textarea>
@@ -371,10 +372,12 @@
                 const shortDesc = todo.description && todo.description.length > maxDesc ? todo.description.slice(0, maxDesc) + '…' : todo.description;
                 // Action button logic
                 let statusBtn = '';
-                if (todo.status === 'completed') {
-                    statusBtn = `<button onclick=\"updateTodoStatus(${todo.id}, 'pending')\">Mark as TODO</button>`;
-                } else {
-                    statusBtn = `<button onclick=\"updateTodoStatus(${todo.id}, 'completed')\">Mark as Completed</button>`;
+                if (todo.status === 'pending') {
+                    statusBtn = `<button onclick=\"updateTodoStatus(${todo.id}, 'in-progress')\" style=\"background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);\">Start Progress</button>`;
+                } else if (todo.status === 'in-progress') {
+                    statusBtn = `<button onclick=\"updateTodoStatus(${todo.id}, 'completed')\" style=\"background: linear-gradient(135deg, #28a745 0%, #20c997 100%);\">Mark as Completed</button>`;
+                } else if (todo.status === 'completed') {
+                    statusBtn = `<button onclick=\"updateTodoStatus(${todo.id}, 'pending')\" style=\"background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);\">Reopen</button>`;
                 }
                 // View and Edit buttons
                 const viewBtn = `<button onclick="showTodoPopup(${todo.id})">View</button>`;
